@@ -99,8 +99,16 @@ Media.prototype.seekTo = function(milliseconds) {
 /**
  * Pause playing audio file.
  */
-Media.prototype.pause = function() {
+ Media.prototype.pause = function() {
     exec(null, this.errorCallback, "Media", "pausePlayingAudio", [this.id]);
+};
+
+			
+/**
+ * Get binary recording audio file.
+ */
+Media.prototype.getBinRecordAudio = function(success, fail) {
+    exec(success, fail, "Media", "getBinRecordAudio", [this.id]);
 };
 
 /**

@@ -117,6 +117,10 @@ public class AudioHandler extends CordovaPlugin {
         else if (action.equals("stopRecordingAudio")) {
             this.stopRecordingAudio(args.getString(0));
         }
+		else if (action.equals("getBinRecordAudio")) {
+            byte[] data = this.getBinRecordAudio(args.getString(0));
+			callbackContext.sendPluginResult(new PluginResult(status, data));
+		}
         else if (action.equals("startPlayingAudio")) {
             String target = args.getString(1);
             String fileUriStr;
@@ -288,6 +292,17 @@ public class AudioHandler extends CordovaPlugin {
             audio.stopRecording();
         }
     }
+
+
+	/**
+     * get binary data of the audio file.
+     * @param id				The id of the audio player
+     */
+    public byte[] getBinRecordAudio(String id) {
+        AudioPlayer audio = this.players.get(id);
+        return audio.getBinRecordAudio();
+    }
+
 
     /**
      * Start or resume playing audio file.

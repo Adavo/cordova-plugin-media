@@ -203,6 +203,22 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
             }
         }
     }
+	
+	/**
+     * Get bin of the recorded file
+     */
+    public byte[] getBinRecordAudio() {
+		String filePath = this.audioFile;
+        if (!filePath.startsWith("/")) {
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + filePath;
+            } else {
+                filePath = "/data/data/" + handler.cordova.getActivity().getPackageName() + "/cache/" + filePath;
+            }
+        }
+		Log.d(LOG_TAG, "Get binary data of the file :" + filePath);
+		return FileHelper.readFile(filePath);
+    }
 
     //==========================================================================
     // Playback

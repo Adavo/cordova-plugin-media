@@ -17,7 +17,118 @@
 #         under the License.
 -->
 
-[![Build Status](https://travis-ci.org/apache/cordova-plugin-media.svg?branch=master)](https://travis-ci.org/apache/cordova-plugin-media)
+
+
+# What's new in this "edition"
+
+I had a simple issue : record the voice of the user and get the byte in order to send it to the server.
+With the official plugin I encounter lot of issues (encoding, store file in the cache folder of the app, get the byte).
+So I change some code. For more information, see "My Work" section.
+
+
+To use it :
+
+// set filename 
+filename = "record.mp4";
+
+// prepare the record and start it.
+recordAudio = new Media(filename, recordAudioSuccessCallbackManagement, errorCallback);
+recordAudio.startRecord();
+
+...
+
+recordAudio.stopRecord();
+recordAudio.play();
+
+...
+
+recordAudio.getBinRecordAudio(successCallback, errorCallback);
+
+successCallback will be called with one argument : an array of byte (byte[]) which will be translated in javascript throught a ArrayBuffer.
+
+
+
+# My work
+
+To encode in mp4 (better than ... amr from my point of view), I update AudioPlayer.java :
+
+    this.recorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT); // THREE_GPP);
+    this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT); //AMR_NB);
+			
+	become 
+	
+    this.recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4); // ADAVO : encode to MPEG_4
+    this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC); // ADAVO : encode to MPEG_4
+			
+To get the record byte, I update AudioPlayer.java by adding this new method :
+	
+	/**
+     * Get bin of the recorded file
+     */
+    public byte[] getBinRecordAudio() {
+		String filePath = this.audioFile;
+        if (!filePath.startsWith("/")) {
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + filePath;
+            } else {
+                filePath = "/data/data/" + handler.cordova.getActivity().getPackageName() + "/cache/" + filePath;
+            }
+        }
+		Log.d(LOG_TAG, "Get binary data of the file :" + filePath);
+		return FileHelper.readFile(filePath);
+    }
+
+The file AudioHandler.java by adding this new method :
+
+	/**
+     * get binary data of the audio file.
+     * @param id				The id of the audio player
+     */
+    public byte[] getBinRecordAudio(String id) {
+        AudioPlayer audio = this.players.get(id);
+        return audio.getBinRecordAudio();
+    }
+
+and editing the execute method by adding this new condition :
+
+		else if (action.equals("getBinRecordAudio")) {
+            byte[] data = this.getBinRecordAudio(args.getString(0));
+			callbackContext.sendPluginResult(new PluginResult(status, data));
+		}
+
+		
+I edit also the FileHelper.java by adding this two new methods :
+
+	public static byte[] readFile(String file) throws IOException {
+        return readFile(new File(file));
+    }
+
+    public static byte[] readFile(File file) throws IOException {
+        // Open file
+        RandomAccessFile f = new RandomAccessFile(file, "r");
+        try {
+            // Get and check length
+            long longlength = f.length();
+            int length = (int) longlength;
+            if (length != longlength)
+                throw new IOException("File size >= 2 GB");
+            // Read file and return data
+            byte[] data = new byte[length];
+            f.readFully(data);
+            return data;
+        } finally {
+            f.close();
+        }
+    }
+
+and finally Media.js by adding the new method :
+			
+	/**
+	 * Get binary recording audio file.
+	 */
+	Media.prototype.getBinRecordAudio = function(success, fail) {
+		exec(success, fail, "Media", "getBinRecordAudio", [this.id]);
+	};
 
 # cordova-plugin-media
 
