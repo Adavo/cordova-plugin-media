@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+
 /**
  * This class implements the audio playback and recording capabilities used by Cordova.
  * It is called by the AudioHandler Cordova class.
@@ -141,8 +142,8 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
         case NONE:
             this.audioFile = file;
             this.recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            this.recorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT); // THREE_GPP);
-            this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT); //AMR_NB);
+            this.recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4); // Adavo : encode to MPEG_4
+            this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC); // Adavo : encode to MPEG_4
             this.recorder.setOutputFile(this.tempFile);
             try {
                 this.recorder.prepare();
@@ -203,23 +204,29 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
             }
         }
     }
-	
-	/**
+
+    /**
      * Get bin of the recorded file
      */
     public byte[] getBinRecordAudio() {
-		String filePath = this.audioFile;
-        if (!filePath.startsWith("/")) {
-            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + filePath;
-            } else {
-                filePath = "/data/data/" + handler.cordova.getActivity().getPackageName() + "/cache/" + filePath;
-            }
+		try {
+			String filePath = this.audioFile;
+			if (!filePath.startsWith("/")) {
+				if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+					filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + filePath;
+				} else {
+					filePath = "/data/data/" + handler.cordova.getActivity().getPackageName() + "/cache/" + filePath;
+				}
+			}
+			Log.d(LOG_TAG, "Get binary data of the file :" + filePath);
+			return FileHelper.readFile(filePath);
+		}
+		catch (Exception e) {
+                e.printStackTrace();
+				return null;
         }
-		Log.d(LOG_TAG, "Get binary data of the file :" + filePath);
-		return FileHelper.readFile(filePath);
     }
-
+	
     //==========================================================================
     // Playback
     //==========================================================================

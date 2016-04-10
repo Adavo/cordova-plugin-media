@@ -69,16 +69,22 @@ To get the record byte, I update AudioPlayer.java by adding this new method :
      * Get bin of the recorded file
      */
     public byte[] getBinRecordAudio() {
-		String filePath = this.audioFile;
-        if (!filePath.startsWith("/")) {
-            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + filePath;
-            } else {
-                filePath = "/data/data/" + handler.cordova.getActivity().getPackageName() + "/cache/" + filePath;
-            }
+		try {
+			String filePath = this.audioFile;
+			if (!filePath.startsWith("/")) {
+				if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+					filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + filePath;
+				} else {
+					filePath = "/data/data/" + handler.cordova.getActivity().getPackageName() + "/cache/" + filePath;
+				}
+			}
+			Log.d(LOG_TAG, "Get binary data of the file :" + filePath);
+			return FileHelper.readFile(filePath);
+		}
+		catch (Exception e) {
+                e.printStackTrace();
+				return null;
         }
-		Log.d(LOG_TAG, "Get binary data of the file :" + filePath);
-		return FileHelper.readFile(filePath);
     }
 
 The file AudioHandler.java by adding this new method :
@@ -100,7 +106,7 @@ and editing the execute method by adding this new condition :
 		}
 
 		
-I edit also the FileHelper.java by adding this two new methods :
+I edit also the FileHelper.java by adding this two new methods (think to import java.io.*) :
 
 	public static byte[] readFile(String file) throws IOException {
         return readFile(new File(file));

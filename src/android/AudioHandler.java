@@ -293,7 +293,6 @@ public class AudioHandler extends CordovaPlugin {
         }
     }
 
-
 	/**
      * get binary data of the audio file.
      * @param id				The id of the audio player
@@ -302,8 +301,7 @@ public class AudioHandler extends CordovaPlugin {
         AudioPlayer audio = this.players.get(id);
         return audio.getBinRecordAudio();
     }
-
-
+	
     /**
      * Start or resume playing audio file.
      * @param id				The id of the audio player
