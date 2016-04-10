@@ -25,6 +25,9 @@ I had a simple issue : record the voice of the user and get the byte in order to
 With the official plugin I encounter lot of issues (encoding, store file in the cache folder of the app, get the byte).
 So I change some code. For more information, see "My Work" section.
 
+Here is the new feature (for now only on android but if you are an iOS developer, feel free to make the iOS version). :
+- encoding in mp4
+- get byte of the recorded file
 
 To use it :
 
