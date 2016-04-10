@@ -28,21 +28,21 @@ So I change some code. For more information, see "My Work" section.
 
 To use it :
 
-// set filename 
-filename = "record.mp4";
-
-// prepare the record and start it.
-recordAudio = new Media(filename, recordAudioSuccessCallbackManagement, errorCallback);
-recordAudio.startRecord();
-
-...
-
-recordAudio.stopRecord();
-recordAudio.play();
+	// set filename 
+	filename = "record.mp4";
+	
+	// prepare the record and start it.
+	recordAudio = new Media(filename, recordAudioSuccessCallbackManagement, errorCallback);
+	recordAudio.startRecord();
 
 ...
 
-recordAudio.getBinRecordAudio(successCallback, errorCallback);
+	recordAudio.stopRecord();
+	recordAudio.play();
+
+...
+
+	recordAudio.getBinRecordAudio(successCallback, errorCallback);
 
 successCallback will be called with one argument : an array of byte (byte[]) which will be translated in javascript throught a ArrayBuffer.
 
