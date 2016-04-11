@@ -206,9 +206,9 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
     }
 
     /**
-     * Get bin of the recorded file
+     * Get bin of the recorded file encoded into a base 64 object
      */
-    public byte[] getBinRecordAudio() {
+    public String getBinRecordAudio() {
 		try {
 			String filePath = this.audioFile;
 			if (!filePath.startsWith("/")) {
@@ -219,7 +219,7 @@ public class AudioPlayer implements OnCompletionListener, OnPreparedListener, On
 				}
 			}
 			Log.d(LOG_TAG, "Get binary data of the file :" + filePath);
-			return FileHelper.readFile(filePath);
+			return android.util.Base64.encodeToString(FileHelper.readFile(filePath), android.util.Base64.DEFAULT);
 		}
 		catch (Exception e) {
                 e.printStackTrace();
