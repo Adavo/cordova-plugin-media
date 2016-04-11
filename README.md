@@ -27,7 +27,7 @@ So I change some code. For more information, see "My Work" section.
 
 Here is the new feature (for now only on android but if you are an iOS developer, feel free to make the iOS version). :
 - encoding in mp4
-- get byte of the recorded file
+- get byte of the recorded file into a base64 string
 
 To use it :
 
@@ -47,7 +47,7 @@ To use it :
 
 	recordAudio.getBinRecordAudio(successCallback, errorCallback);
 
-successCallback will be called with one argument : an array of byte (byte[]) which will be translated in javascript throught a ArrayBuffer.
+successCallback will be called with one argument : a string that represents the base64 encoded of the byte array (byte[]) of the recorded file
 
 
 
@@ -65,10 +65,10 @@ To encode in mp4 (better than ... amr from my point of view), I update AudioPlay
 			
 To get the record byte, I update AudioPlayer.java by adding this new method :
 	
-	/**
-     * Get bin of the recorded file
+    /**
+     * Get bin of the recorded file encoded into a base 64 object
      */
-    public byte[] getBinRecordAudio() {
+    public String getBinRecordAudio() {
 		try {
 			String filePath = this.audioFile;
 			if (!filePath.startsWith("/")) {
@@ -79,7 +79,7 @@ To get the record byte, I update AudioPlayer.java by adding this new method :
 				}
 			}
 			Log.d(LOG_TAG, "Get binary data of the file :" + filePath);
-			return FileHelper.readFile(filePath);
+			return android.util.Base64.encodeToString(FileHelper.readFile(filePath), android.util.Base64.DEFAULT);
 		}
 		catch (Exception e) {
                 e.printStackTrace();
@@ -90,10 +90,10 @@ To get the record byte, I update AudioPlayer.java by adding this new method :
 The file AudioHandler.java by adding this new method :
 
 	/**
-     * get binary data of the audio file.
+     * get binary data of the audio file encoded into base64 object
      * @param id				The id of the audio player
      */
-    public byte[] getBinRecordAudio(String id) {
+    public String getBinRecordAudio(String id) {
         AudioPlayer audio = this.players.get(id);
         return audio.getBinRecordAudio();
     }
@@ -101,7 +101,7 @@ The file AudioHandler.java by adding this new method :
 and editing the execute method by adding this new condition :
 
 		else if (action.equals("getBinRecordAudio")) {
-            byte[] data = this.getBinRecordAudio(args.getString(0));
+            String data = this.getBinRecordAudio(args.getString(0));
 			callbackContext.sendPluginResult(new PluginResult(status, data));
 		}
 
