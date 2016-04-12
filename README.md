@@ -50,7 +50,7 @@ To use it :
 successCallback will be called with one argument : a string that represents the base64 encoded of the byte array (byte[]) of the recorded file
 
 # For (iOS)
-To encode in mp4 (better than ... amr from my point of view), I update CDVSound.m :
+To encode in mp4 ( for ios default extension is .acc, I just save it as .mp4), I update CDVSound.m :
 
     Add:
 	
