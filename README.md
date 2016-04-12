@@ -75,6 +75,7 @@ To encode in mp4 ( for ios default extension is .acc, I just save it as .mp4), I
             audioFile.recorder = [[CDVAudioRecorder alloc] initWithURL:audioFile.resourceURL settings:audioSettings error:&error];	
 			
 To get the record byte, I update CDVSound.h by adding this new method :		
+
 	- (void)getBinRecordAudio:(CDVInvokedUrlCommand*)command;
 	
 The file CDVSound.m by adding this new method :
