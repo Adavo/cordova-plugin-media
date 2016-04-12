@@ -49,9 +49,56 @@ To use it :
 
 successCallback will be called with one argument : a string that represents the base64 encoded of the byte array (byte[]) of the recorded file
 
+# For (iOS)
+To encode in mp4 (better than ... amr from my point of view), I update CDVSound.m :
 
+    Add:
+	
+	#define RECORDING_MP4 @"mp4"
 
-# My work
+	Update:
+	
+	// first check for correct extension
+    if ([[resourcePath pathExtension] caseInsensitiveCompare:RECORDING_WAV] != NSOrderedSame) {
+        ...
+        NSLog(@"Resource for recording must have %@ extension", RECORDING_WAV);
+	...
+            audioFile.recorder = [[CDVAudioRecorder alloc] initWithURL:audioFile.resourceURL settings:nil error:&error];
+			
+	become 
+	
+	// first check for correct extension
+    if ([[resourcePath pathExtension] caseInsensitiveCompare:RECORDING_MP4] != NSOrderedSame) {
+        ...
+        NSLog(@"Resource for recording must have %@ extension", RECORDING_MP4);
+	...
+            audioFile.recorder = [[CDVAudioRecorder alloc] initWithURL:audioFile.resourceURL settings:audioSettings error:&error];	
+			
+To get the record byte, I update CDVSound.h by adding this new method :		
+	- (void)getBinRecordAudio:(CDVInvokedUrlCommand*)command;
+	
+The file CDVSound.m by adding this new method :
+	- (void)getBinRecordAudio:(CDVInvokedUrlCommand*)command
+	{
+		NSString* callbackId = command.callbackId;
+		NSString* mediaId = [command argumentAtIndex:0];
+		
+	#pragma unused(mediaId)
+		CDVAudioFile* audioFile = [[self soundCache] objectForKey:mediaId];
+		double position = -1;
+		
+		NSFileHandle *readHandle = [NSFileHandle fileHandleForReadingFromURL:audioFile.resourceURL error: nil];
+		NSData *nsdata = [readHandle readDataToEndOfFile];
+		NSString *base64Data  = [[NSString alloc] initWithData:[nsdata base64EncodedDataWithOptions:0] encoding:NSASCIIStringEncoding];
+		
+		CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:base64Data];
+		
+		NSString* jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%.3f);", @"cordova.require('cordova-plugin-media.Media').onStatus", mediaId, MEDIA_POSITION, position];
+		[self.commandDelegate evalJs:jsString];
+		[self.commandDelegate sendPluginResult:result callbackId:callbackId];
+	}
+
+# My work (android)
 
 To encode in mp4 (better than ... amr from my point of view), I update AudioPlayer.java :
 

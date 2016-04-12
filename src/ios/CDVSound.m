@@ -24,6 +24,7 @@
 #define HTTPS_SCHEME_PREFIX @"https://"
 #define CDVFILE_PREFIX @"cdvfile://"
 #define RECORDING_WAV @"wav"
+#define RECORDING_MP4 @"mp4"
 
 @implementation CDVSound
 
@@ -37,9 +38,9 @@
     NSString* docsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
 
     // first check for correct extension
-    if ([[resourcePath pathExtension] caseInsensitiveCompare:RECORDING_WAV] != NSOrderedSame) {
+    if ([[resourcePath pathExtension] caseInsensitiveCompare:RECORDING_MP4] != NSOrderedSame) {
         resourceURL = nil;
-        NSLog(@"Resource for recording must have %@ extension", RECORDING_WAV);
+        NSLog(@"Resource for recording must have %@ extension", RECORDING_MP4);
     } else if ([resourcePath hasPrefix:DOCUMENTS_SCHEME_PREFIX]) {
         // try to find Documents:// resources
         filePath = [resourcePath stringByReplacingOccurrencesOfString:DOCUMENTS_SCHEME_PREFIX withString:[NSString stringWithFormat:@"%@/", docsPath]];
@@ -595,6 +596,26 @@
     }
 }
 
+- (void)getBinRecordAudio:(CDVInvokedUrlCommand*)command
+{
+    NSString* callbackId = command.callbackId;
+    NSString* mediaId = [command argumentAtIndex:0];
+    
+#pragma unused(mediaId)
+    CDVAudioFile* audioFile = [[self soundCache] objectForKey:mediaId];
+    double position = -1;
+    
+    NSFileHandle *readHandle = [NSFileHandle fileHandleForReadingFromURL:audioFile.resourceURL error: nil];
+    NSData *nsdata = [readHandle readDataToEndOfFile];
+    NSString *base64Data  = [[NSString alloc] initWithData:[nsdata base64EncodedDataWithOptions:0] encoding:NSASCIIStringEncoding];
+    
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:base64Data];
+    
+    NSString* jsString = [NSString stringWithFormat:@"%@(\"%@\",%d,%.3f);", @"cordova.require('cordova-plugin-media.Media').onStatus", mediaId, MEDIA_POSITION, position];
+    [self.commandDelegate evalJs:jsString];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+}
+
 - (void)getCurrentPositionAudio:(CDVInvokedUrlCommand*)command
 {
     NSString* callbackId = command.callbackId;
@@ -663,7 +684,7 @@
                                              AVNumberOfChannelsKey: @(1),
                                              AVEncoderAudioQualityKey: @(AVAudioQualityMedium)
                                              };
-            audioFile.recorder = [[CDVAudioRecorder alloc] initWithURL:audioFile.resourceURL settings:nil error:&error];
+            audioFile.recorder = [[CDVAudioRecorder alloc] initWithURL:audioFile.resourceURL settings:audioSettings error:&error];
 
             bool recordingSuccess = NO;
             if (error == nil) {
