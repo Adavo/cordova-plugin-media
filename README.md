@@ -78,6 +78,7 @@ To get the record byte, I update CDVSound.h by adding this new method :
 	- (void)getBinRecordAudio:(CDVInvokedUrlCommand*)command;
 	
 The file CDVSound.m by adding this new method :
+
 	- (void)getBinRecordAudio:(CDVInvokedUrlCommand*)command
 	{
 		NSString* callbackId = command.callbackId;
